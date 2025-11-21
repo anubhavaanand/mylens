@@ -1192,8 +1192,7 @@ Keep each insight concise (max 5 words).`;
 
                 // Extract text from all pages
                 for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
-                    uploadStatus.textContent = `📄 Processing page ${pageNum} of ${total Pages
-                }...`;
+                    uploadStatus.textContent = `📄 Processing page ${pageNum} of ${totalPages}...`;
                     const page = await pdf.getPage(pageNum);
                     const textContent = await page.getTextContent();
                     const pageText = textContent.items.map(item => item.str).join(' ');
@@ -1203,11 +1202,11 @@ Keep each insight concise (max 5 words).`;
                 // Limit text length to avoid API limits (max ~30,000 characters)
                 if (fullText.length > 30000) {
                     fullText = fullText.substring(0, 30000) + '...';
-                    uploadStatus.textContent = `✅ Loaded ${ file.name } (first ${ totalPages } pages, truncated to 30k chars)`;
+                    uploadStatus.textContent = `✅ Loaded ${file.name} (first ${totalPages} pages, truncated to 30k chars)`;
                 } else {
-                    uploadStatus.textContent = `✅ Loaded ${ file.name } (${ totalPages } pages, ${ fullText.length } characters)`;
+                    uploadStatus.textContent = `✅ Loaded ${file.name} (${totalPages} pages, ${fullText.length} characters)`;
                 }
-                
+
                 uploadStatus.style.color = 'var(--success)';
                 inputText.value = fullText.trim();
 
@@ -1218,7 +1217,7 @@ Keep each insight concise (max 5 words).`;
 
             } catch (error) {
                 console.error('PDF upload error:', error);
-                uploadStatus.textContent = `❌ Error loading PDF: ${ error.message }`;
+                uploadStatus.textContent = `❌ Error loading PDF: ${error.message}`;
                 uploadStatus.style.color = 'var(--error)';
             }
 
