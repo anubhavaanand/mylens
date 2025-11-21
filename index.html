@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -329,7 +331,9 @@
         }
 
         @keyframes spin {
-            to { transform: rotate(360deg); }
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         .loading-text {
@@ -494,7 +498,7 @@
             h1 {
                 font-size: 1.4rem;
             }
-            
+
             .header-controls {
                 width: 100%;
                 justify-content: center;
@@ -507,6 +511,7 @@
         }
     </style>
 </head>
+
 <body data-theme="default">
     <header>
         <div class="header-content">
@@ -522,21 +527,40 @@
         <div class="main-layout">
             <!-- Left Panel: Input & Controls -->
             <div class="panel">
-                <h2 class="panel-title">Input Text</h2>
-                <textarea id="inputText" placeholder="Enter any text, topic, or concept to visualize...
+                <h2 class="panel-title">Input Text or Upload PDF</h2>
+
+                <!-- File Upload Section -->
+                <div class="input-group" style="margin-bottom: 16px;">
+                    <input type="file" id="pdfUpload" accept=".pdf" style="display: none;">
+                    <button class="btn btn-secondary" id="uploadPdfBtn" style="width: 100%;">
+                        📄 Upload PDF File
+                    </button>
+                    <div id="uploadStatus"
+                        style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 8px; display: none;"></div>
+                </div>
+
+                <textarea id="inputText"
+                    placeholder="Enter any text, topic, or concept to visualize...
 
 Example: 'Photosynthesis is the process by which plants convert light energy into chemical energy. It involves light-dependent reactions and the Calvin cycle.'"></textarea>
-                
+
                 <div class="controls">
                     <button class="btn btn-primary" id="generateBtn">✨ Generate Mind Map</button>
                     <button class="btn btn-secondary" id="clearBtn">🗑️ Clear</button>
                 </div>
 
                 <div class="example-prompts">
-                    <label style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.9rem;">Quick Examples:</label>
-                    <div class="example-prompt" data-text="Machine Learning is a subset of AI that enables computers to learn from data. Key types include supervised, unsupervised, and reinforcement learning.">🤖 Machine Learning Basics</div>
-                    <div class="example-prompt" data-text="The water cycle involves evaporation, condensation, precipitation, and collection. Water moves between Earth's surface and atmosphere continuously.">💧 Water Cycle</div>
-                    <div class="example-prompt" data-text="Project Management involves initiation, planning, execution, monitoring, and closure. Key tools include Gantt charts, Kanban boards, and agile methodologies.">📊 Project Management</div>
+                    <label style="display: block; margin-bottom: 8px; font-weight: 500; font-size: 0.9rem;">Quick
+                        Examples:</label>
+                    <div class="example-prompt"
+                        data-text="Machine Learning is a subset of AI that enables computers to learn from data. Key types include supervised, unsupervised, and reinforcement learning.">
+                        🤖 Machine Learning Basics</div>
+                    <div class="example-prompt"
+                        data-text="The water cycle involves evaporation, condensation, precipitation, and collection. Water moves between Earth's surface and atmosphere continuously.">
+                        💧 Water Cycle</div>
+                    <div class="example-prompt"
+                        data-text="Project Management involves initiation, planning, execution, monitoring, and closure. Key tools include Gantt charts, Kanban boards, and agile methodologies.">
+                        📊 Project Management</div>
                 </div>
 
                 <div class="stats" id="stats" style="display: none;">
@@ -579,8 +603,9 @@ Example: 'Photosynthesis is the process by which plants convert light energy int
         <div class="modal-content">
             <h2>🔑 API Key Required</h2>
             <p>This application uses Google Gemini AI to generate mind maps. You'll need a free API key to continue.</p>
-            <p>Get your free API key from: <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a></p>
-            
+            <p>Get your free API key from: <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI
+                    Studio</a></p>
+
             <div class="input-group">
                 <label for="apiKeyInput">Enter your Gemini API Key:</label>
                 <input type="password" id="apiKeyInput" placeholder="AIzaSy...">
@@ -598,7 +623,7 @@ Example: 'Photosynthesis is the process by which plants convert light energy int
     <div class="api-key-modal" id="settingsModal">
         <div class="modal-content">
             <h2>⚙️ Settings</h2>
-            
+
             <div class="settings-section">
                 <label style="display: block; margin-bottom: 8px; font-weight: 500;">Color Theme:</label>
                 <div class="theme-selector">
@@ -637,7 +662,7 @@ Example: 'Photosynthesis is the process by which plants convert light energy int
     <script>
         // Configuration
         const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
-        
+
         // State
         let apiKey = localStorage.getItem('gemini_api_key');
         let mindMapData = null;
@@ -681,6 +706,14 @@ Example: 'Photosynthesis is the process by which plants convert light energy int
                 clearCanvas();
                 hideStats();
             });
+
+            // PDF Upload button
+            document.getElementById('uploadPdfBtn').addEventListener('click', () => {
+                document.getElementById('pdfUpload').click();
+            });
+
+            // PDF File input
+            document.getElementById('pdfUpload').addEventListener('change', handlePDFUpload);
 
             // Export button
             exportBtn.addEventListener('click', exportToPNG);
@@ -744,7 +777,7 @@ Example: 'Photosynthesis is the process by which plants convert light energy int
         function saveApiKey() {
             const keyInput = document.getElementById('apiKeyInput');
             const key = keyInput.value.trim();
-            
+
             if (!key) {
                 showError('apiKeyError', 'Please enter an API key');
                 return;
@@ -767,7 +800,7 @@ Example: 'Photosynthesis is the process by which plants convert light energy int
 
         async function generateMindMap() {
             const text = inputText.value.trim();
-            
+
             if (!text) {
                 alert('Please enter some text to analyze');
                 return;
@@ -779,7 +812,7 @@ Example: 'Photosynthesis is the process by which plants convert light energy int
             }
 
             showLoading();
-            
+
             try {
                 const data = await analyzeWithAI(text);
                 mindMapData = data;
@@ -835,12 +868,12 @@ ${text}`;
 
             const result = await response.json();
             const aiText = result.candidates[0].content.parts[0].text;
-            
+
             // Parse JSON from AI response
             let jsonText = aiText.trim();
             // Remove markdown code blocks if present
             jsonText = jsonText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
-            
+
             return JSON.parse(jsonText);
         }
 
@@ -867,7 +900,7 @@ ${text}`;
 
             // Draw branches
             const angleStep = (Math.PI * 2) / data.branches.length;
-            
+
             data.branches.forEach((branch, i) => {
                 const angle = i * angleStep - Math.PI / 2;
                 const branchX = centerX + Math.cos(angle) * branchRadius;
@@ -923,7 +956,7 @@ ${text}`;
 
         function drawNode(node) {
             const { x, y, width, height, text, type } = node;
-            
+
             // Shadow
             ctx.save();
             ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
@@ -935,7 +968,7 @@ ${text}`;
             const cornerRadius = 12;
             ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--node-bg');
             ctx.beginPath();
-            ctx.roundRect(x - width/2, y - height/2, width, height, cornerRadius);
+            ctx.roundRect(x - width / 2, y - height / 2, width, height, cornerRadius);
             ctx.fill();
             ctx.restore();
 
@@ -947,7 +980,7 @@ ${text}`;
 
             // Gradient overlay for central node
             if (type === 'central') {
-                const gradient = ctx.createLinearGradient(x - width/2, y - height/2, x + width/2, y + height/2);
+                const gradient = ctx.createLinearGradient(x - width / 2, y - height / 2, x + width / 2, y + height / 2);
                 gradient.addColorStop(0, 'rgba(37, 99, 235, 0.1)');
                 gradient.addColorStop(1, 'rgba(139, 92, 246, 0.1)');
                 ctx.fillStyle = gradient;
@@ -959,7 +992,7 @@ ${text}`;
             ctx.font = type === 'central' ? 'bold 16px Inter' : type === 'branch' ? '600 14px Inter' : '500 12px Inter';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            
+
             // Wrap text
             const words = text.split(' ');
             const lines = [];
@@ -990,7 +1023,7 @@ ${text}`;
             ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--connection-color');
             ctx.lineWidth = isSubtopic ? 1.5 : 2;
             ctx.setLineDash(isSubtopic ? [5, 5] : []);
-            
+
             // Curved line
             const midX = (x1 + x2) / 2;
             const midY = (y1 + y2) / 2;
@@ -1021,7 +1054,7 @@ ${text}`;
             const rect = container.getBoundingClientRect();
             canvas.width = Math.max(800, rect.width - 48);
             canvas.height = Math.max(600, rect.height - 48);
-            
+
             if (mindMapData) {
                 drawMindMap(mindMapData);
             }
@@ -1033,7 +1066,7 @@ ${text}`;
             const y = e.clientY - rect.top;
 
             const clickedNode = getNodeAt(x, y);
-            
+
             if (clickedNode && (clickedNode.type === 'branch' || clickedNode.type === 'central')) {
                 expandNode(clickedNode);
             }
@@ -1045,7 +1078,7 @@ ${text}`;
             const y = e.clientY - rect.top;
 
             const node = getNodeAt(x, y);
-            
+
             if (node) {
                 canvas.style.cursor = 'pointer';
                 if (node.type !== 'subtopic') {
@@ -1063,8 +1096,8 @@ ${text}`;
         function getNodeAt(x, y) {
             for (let i = nodes.length - 1; i >= 0; i--) {
                 const node = nodes[i];
-                if (x >= node.x - node.width/2 && x <= node.x + node.width/2 &&
-                    y >= node.y - node.height/2 && y <= node.y + node.height/2) {
+                if (x >= node.x - node.width / 2 && x <= node.x + node.width / 2 &&
+                    y >= node.y - node.height / 2 && y <= node.y + node.height / 2) {
                     return node;
                 }
             }
@@ -1073,7 +1106,7 @@ ${text}`;
 
         async function expandNode(node) {
             showLoading();
-            
+
             try {
                 const prompt = `Provide 3-4 additional insights or subtopics related to: "${node.text}". 
 Return only a JSON array of strings, like: ["insight 1", "insight 2", "insight 3"]
@@ -1090,9 +1123,9 @@ Keep each insight concise (max 5 words).`;
                 const result = await response.json();
                 let aiText = result.candidates[0].content.parts[0].text.trim();
                 aiText = aiText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
-                
+
                 const insights = JSON.parse(aiText);
-                
+
                 // Add insights as new subtopics
                 if (node.type === 'branch' && node.data) {
                     node.data.subtopics = [...node.data.subtopics, ...insights.slice(0, 3)];
@@ -1136,6 +1169,63 @@ Keep each insight concise (max 5 words).`;
             stats.style.display = 'none';
         }
 
+        // PDF Upload Handler
+        async function handlePDFUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const uploadStatus = document.getElementById('uploadStatus');
+            uploadStatus.style.display = 'block';
+            uploadStatus.textContent = `📄 Loading ${file.name}...`;
+            uploadStatus.style.color = 'var(--primary-color)';
+
+            try {
+                // Set PDF.js worker
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+                // Read file as array buffer
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+                let fullText = '';
+                const totalPages = pdf.numPages;
+
+                // Extract text from all pages
+                for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+                    uploadStatus.textContent = `📄 Processing page ${pageNum} of ${total Pages
+                }...`;
+                    const page = await pdf.getPage(pageNum);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
+                    fullText += pageText + '\n\n';
+                }
+
+                // Limit text length to avoid API limits (max ~30,000 characters)
+                if (fullText.length > 30000) {
+                    fullText = fullText.substring(0, 30000) + '...';
+                    uploadStatus.textContent = `✅ Loaded ${ file.name } (first ${ totalPages } pages, truncated to 30k chars)`;
+                } else {
+                    uploadStatus.textContent = `✅ Loaded ${ file.name } (${ totalPages } pages, ${ fullText.length } characters)`;
+                }
+                
+                uploadStatus.style.color = 'var(--success)';
+                inputText.value = fullText.trim();
+
+                // Auto-clear status after 5 seconds
+                setTimeout(() => {
+                    uploadStatus.style.display = 'none';
+                }, 5000);
+
+            } catch (error) {
+                console.error('PDF upload error:', error);
+                uploadStatus.textContent = `❌ Error loading PDF: ${ error.message }`;
+                uploadStatus.style.color = 'var(--error)';
+            }
+
+            // Clear file input
+            event.target.value = '';
+        }
+
         // Polyfill for roundRect (for older browsers)
         if (!CanvasRenderingContext2D.prototype.roundRect) {
             CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height, radius) {
@@ -1154,4 +1244,5 @@ Keep each insight concise (max 5 words).`;
         }
     </script>
 </body>
+
 </html>
