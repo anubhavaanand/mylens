@@ -112,8 +112,8 @@ export const useGraphStore = create<GraphState & GraphActions>((set, get) => ({
     const { nodes, edges, history, historyIndex } = get();
     const newHistory = history.slice(0, historyIndex + 1);
     newHistory.push({
-      nodes: JSON.parse(JSON.stringify(nodes)),
-      edges: JSON.parse(JSON.stringify(edges)),
+      nodes: structuredClone(nodes),
+      edges: structuredClone(edges),
     });
     // Keep only last 50 history items
     if (newHistory.length > 50) {

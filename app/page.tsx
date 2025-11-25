@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef } from "react";
+// Note: useObject is experimental but provides streaming object support needed for partial JSON streaming
 import { experimental_useObject as useObject } from "@ai-sdk/react";
 import { Canvas } from "@/components/Canvas";
 import { Sidebar } from "@/components/Sidebar";

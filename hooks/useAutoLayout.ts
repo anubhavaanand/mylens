@@ -4,6 +4,7 @@ import { useEffect, useRef, useCallback } from "react";
 import { useGraphStore } from "@/store/graphStore";
 import { getLayoutedElements } from "@/lib/layout";
 
+/** Debounce delay for layout recalculation to prevent excessive updates during rapid graph changes */
 const LAYOUT_DEBOUNCE_MS = 150;
 
 export function useAutoLayout() {

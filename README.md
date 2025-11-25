@@ -1,8 +1,8 @@
 # 🧠 Visual Intelligence Workspace
 
-A production-grade visual intelligence workspace that transforms unstructured text or PDFs into interactive, node-based diagrams (Mind Maps, Timelines, Quadrants) on an infinite canvas.
+A production-grade visual intelligence workspace that transforms unstructured text into interactive, node-based diagrams (Mind Maps, Timelines, Quadrants) on an infinite canvas.
 
-![Next.js](https://img.shields.io/badge/Next.js-16+-black?logo=next.js)
+![Next.js](https://img.shields.io/badge/Next.js-14+-black?logo=next.js)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5+-blue?logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4+-38B2AC?logo=tailwind-css)
 
@@ -19,7 +19,7 @@ A production-grade visual intelligence workspace that transforms unstructured te
 
 ## 🛠️ Tech Stack
 
-- **Framework**: Next.js 16+ (App Router, Server Components)
+- **Framework**: Next.js 14+ (App Router, Server Components)
 - **Language**: TypeScript (Strict mode)
 - **Styling**: Tailwind CSS with shadcn/ui components
 - **Icons**: Lucide React

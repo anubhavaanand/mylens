@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Visual Intelligence Workspace",
-  description: "Transform text and PDFs into interactive mind maps, timelines, and quadrant diagrams powered by AI",
+  description: "Transform text into interactive mind maps, timelines, and quadrant diagrams powered by AI",
 };
 
 export default function RootLayout({
